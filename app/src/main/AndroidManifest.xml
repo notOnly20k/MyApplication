@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.administrator.myapplication">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application
+        android:name="com.example.administrator.app.MyApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".xiaoxi"></activity>
+        <activity android:name=".chat" />
+        <activity android:name=".shangpinliebiao" />
+        <activity android:name=".gerenzhongxin" />
+        <activity android:name=".goodlist" />
+        <activity android:name=".zhu_ce" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".shangpinguanli" />
+        <activity android:name=".mima" />
+        <activity android:name=".geren_ziliao" />
+        <activity android:name=".yonghuguanli" />
+        <activity android:name=".fabu_shangpin" />
+        <activity android:name=".fenlei" />
+        <activity android:name=".shangpin_xiangqing" />
+    </application>
+
+</manifest>

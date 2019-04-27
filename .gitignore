@@ -1,0 +1,25 @@
+*.iml
+.gradle
+/local.properties
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+将删除 .gitignore
+将删除 .idea/caches/
+将删除 .idea/codeStyles/
+将删除 .idea/dbnavigator.xml
+将删除 .idea/gradle.xml
+将删除 .idea/misc.xml
+将删除 .idea/runConfigurations.xml
+将删除 app/
+将删除 build.gradle
+将删除 gradle.properties
+将删除 gradle/
+将删除 gradlew
+将删除 gradlew.bat
+将删除 settings.gradle
+/.idea/
