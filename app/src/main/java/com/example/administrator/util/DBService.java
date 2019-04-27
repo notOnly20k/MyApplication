@@ -376,7 +376,6 @@ public class DBService {
     public Observable<List<shangpin>> getMyGoodsData(int id) {
         return Observable.just(id)
                 .map(new Function<Integer, List<shangpin>>() {
-
                     @Override
                     public List<shangpin> apply(Integer id) throws Exception {
                         List<shangpin>list=new ArrayList<>();
