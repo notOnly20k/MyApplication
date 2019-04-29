@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="5dp"
+    android:background="@color/white"
+    android:padding="5dp"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="订单消息"
+        />
+
+    <TextView
+        android:id="@+id/tv_goodName1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        android:text="商品名称："
+        />
+    <TextView
+        android:id="@+id/tv_goodName"
+        android:layout_toRightOf="@id/tv_goodName1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        tools:text="ssss"
+        />
+
+    <TextView
+        android:id="@+id/tv_buyerName1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        android:layout_toLeftOf="@id/tv_buyerName"
+        android:text="买家："
+        />
+    <TextView
+        android:id="@+id/tv_buyerName"
+       android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        tools:text="ssss"
+        />
+
+    <TextView
+        android:id="@+id/tv_time1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_buyerName"
+        android:text="时间："
+        />
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_buyerName"
+        android:layout_toRightOf="@id/tv_time1"
+        tools:text="ssss"
+        />
+
+    <TextView
+        android:id="@+id/tv_tel1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_time1"
+        android:text="电话："
+        />
+    <TextView
+        android:id="@+id/tv_tel"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_time1"
+        android:layout_toRightOf="@id/tv_tel1"
+        tools:text="ssss"
+        />
+
+    <TextView
+        android:id="@+id/tv_address1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_tel1"
+        android:text="地址："
+        />
+    <TextView
+        android:id="@+id/tv_address"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_tel1"
+        android:layout_toRightOf="@id/tv_tel1"
+        tools:text="ssss"
+        />
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:textColor="@color/red"
+        android:textSize="18sp"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_buyerName"
+        tools:text="ssss"
+        />
+
+
+
+</RelativeLayout>

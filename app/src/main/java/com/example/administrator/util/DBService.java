@@ -3,6 +3,7 @@ package com.example.administrator.util;
 import android.util.Log;
 import android.util.Pair;
 
+import com.example.administrator.model.Order;
 import com.example.administrator.model.pinlun;
 import com.example.administrator.model.pinlunhuifu;
 import com.example.administrator.model.shangpin;
@@ -115,6 +116,44 @@ public class DBService {
 
     }
 
+    public Observable<Integer> updateGoodsData(shangpin good) {
+        return Observable.just(good)
+                .map(new Function<shangpin, Integer>() {
+
+                    @Override
+                    public Integer apply(shangpin good) throws Exception {
+                        int result = -1;
+                        conn = DBOpenHelper.getConn();
+//                        UPDATE `secondhand`.`shangpin` SET `mincheng`='111112' WHERE `shangpinid`='2';
+//
+                        String sql = "UPDATE shangpin set mincheng=?,yonghuid=?,shijian=?,leibie=?,xijie=?,jiage=?,yuanjia=?,tupian=?,quhuofangshi=?,xingjiuchengdu=? where shangpinid =? ";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, good.getMincheng());//第一个参数 name 规则同上
+                        ps.setInt(2, good.getYonghuid());//第二个参数 phone 规则同上
+                        ps.setDate(3, new Date(good.getShijian().getTime()) );//第三个参数 content 规则同上
+                        ps.setString(4, good.getLeibie());//第四个参数 state 规则同上
+                        ps.setString(5, good.getXijie());//第四个参数 state 规则同上
+                        ps.setDouble(6, good.getJiage());//第二个参数 phone 规则同上
+                        ps.setDouble(7, good.getYuanjia());//第三个参数 content 规则同上
+                        ps.setString(8, good.getTupian());//第四个参数 state 规则同上
+                        ps.setString(9, good.getQuhuofangshi());//第四个参数 state 规则同上
+                        ps.setDouble(10, good.getXingjiuchengdu());//第四个参数 state 规则同上
+                        ps.setDouble(11, good.getShangpinid());//第四个参数 state 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+
+    }
+
 
     public Observable<List<shangpin>> getGoodsData(final Pair<String,String> pair) {
         return Observable.just(pair)
@@ -149,7 +188,6 @@ public class DBService {
                             ps.setString(1,type);
                             rs = ps.executeQuery();
                             while (rs.next()){
-                                Log.e("getGoodsData",rs.getDouble("jiage")+"");
                                 shangpin good=new shangpin();
                                 yonghu u = new yonghu();
                                 u.setDizhi(rs.getString("dizhi"));
@@ -218,6 +256,7 @@ public class DBService {
                                         u.setXuehao(rs.getString("xuehao"));
                                         u.setYonghuid(rs.getInt("yonghuid"));
                                         u.setXingming(rs.getString("xingming"));
+                                        u.setMima(rs.getString("mima"));
                                         return Optional.of(u);
                                     }
                                 }
@@ -428,6 +467,241 @@ public class DBService {
                 });
 
     }
+
+    public Observable<List<shangpin>> getCollectGoodsData(int id) {
+        return Observable.just(id)
+                .map(new Function<Integer, List<shangpin>>() {
+                    @Override
+                    public List<shangpin> apply(Integer id) throws Exception {
+                        List<shangpin>list=new ArrayList<>();
+                        conn = DBOpenHelper.getConn();
+                        String sql = "SELECT * FROM shangpin inner join yonghu where shangpin.yonghuid = yonghu.yonghuid and shangpinid in (select goodId from user2good where userId = ?)";
+                        Log.e("sql",sql);
+                        ps = conn.prepareStatement(sql);
+                        if (ps!=null){
+                            ps.setInt(1,id);
+                            rs = ps.executeQuery();
+                            while (rs.next()){
+                                Log.e("getGoodsData",rs.getDouble("jiage")+"");
+                                shangpin good=new shangpin();
+                                yonghu u = new yonghu();
+                                u.setDizhi(rs.getString("dizhi"));
+                                u.setLianxidianhua(rs.getString("lianxidianhua"));
+                                u.setType(rs.getString("type"));
+                                u.setXingbie(rs.getString("xingbie"));
+                                u.setXuehao(rs.getString("xuehao"));
+                                u.setYonghuid(rs.getInt("yonghuid"));
+                                u.setXingming(rs.getString("xingming"));
+                                good.setJiage(rs.getDouble("jiage"));
+                                good.setLeibie(rs.getString("leibie"));
+                                good.setLiulanrenshu(rs.getInt("liulanrenshu"));
+                                good.setMincheng(rs.getString("mincheng"));
+                                good.setQuhuofangshi(rs.getString("quhuofangshi"));
+                                good.setShifoujiajia(rs.getInt("shifoujiajia"));
+                                good.setTupian(rs.getString("tupian"));
+                                good.setShangpinid(rs.getInt("shangpinid"));
+                                good.setZhuangtai(rs.getInt("zhuangtai"));
+                                good.setXingjiuchengdu(rs.getDouble("xingjiuchengdu"));
+                                good.setXijie(rs.getString("xijie"));
+                                good.setYuanjia(rs.getDouble("yuanjia"));
+                                good.setYonghuid(rs.getInt("yonghuid"));
+                                good.setShijian(rs.getDate("shijian"));
+                                good.setYonghu(u);
+                                list.add(good);
+                            }
+                        }
+                        DBOpenHelper.closeAll(conn, ps);
+                        return list;
+                    }
+                }).onErrorReturn(new Function<Throwable,  List<shangpin>>() {
+                    @Override
+                    public  List<shangpin> apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return new ArrayList<>();
+                    }
+                });
+
+    }
+
+
+    public Observable<Integer> collectionGood(final Pair<Integer,Integer> pair) {
+        return Observable.just(pair)
+                .map(new Function<Pair, Integer>() {
+
+                    @Override
+                    public Integer apply(Pair comment) throws Exception {
+                        int result=-1;
+                        conn = DBOpenHelper.getConn();
+                        String sql="INSERT INTO user2good (userId,goodId) VALUES (?,?)";
+                        ps = conn.prepareStatement(sql);
+                        ps.setInt(1, pair.first);//第一个参数 name 规则同上
+                        ps.setInt(2, pair.second);//第二个参数 phone 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+    }
+
+    public Observable<Integer> delcollectionGood(final Pair<Integer,Integer> pair) {
+        return Observable.just(pair)
+                .map(new Function<Pair, Integer>() {
+
+                    @Override
+                    public Integer apply(Pair comment) throws Exception {
+                        int result=-1;
+                        conn = DBOpenHelper.getConn();
+                        String sql="delete  from  user2good where userId =? and goodId =?";
+                        ps = conn.prepareStatement(sql);
+                        ps.setInt(1, pair.first);//第一个参数 name 规则同上
+                        ps.setInt(2, pair.second);//第二个参数 phone 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+    }
+
+    public Observable<Integer> delGood(int id) {
+        return Observable.just(id)
+                .map(new Function<Integer, Integer>() {
+
+                    @Override
+                    public Integer apply(Integer id) throws Exception {
+                        int result=-1;
+                        conn = DBOpenHelper.getConn();
+                        String sql="delete  from  shangpin where shangpinid =?";
+                        ps = conn.prepareStatement(sql);
+                        ps.setInt(1,id);//第一个参数 name 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+    }
+
+
+    public Observable<Integer> insertOrder(Order order) {
+        return Observable.just(order)
+                .map(new Function<Order, Integer>() {
+
+                    @Override
+                    public Integer apply(Order order) throws Exception {
+                        int result=-1;
+                        conn = DBOpenHelper.getConn();
+                        String sql = "INSERT INTO good_order (goodName,buyerName,tel,address,sellerId,status,createTime) VALUES (?,?,?,?,?,?,?)";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, order.getGoodName());//第一个参数 name 规则同上
+                        ps.setString(2, order.getBuyerName());//第二个参数 phone 规则同上
+                        ps.setString(3, order.getTel());//第三个参数 content 规则同上
+                        ps.setString(4, order.getAddress());//第四个参数 state 规则同上
+                        ps.setInt(5, order.getSellerId());//第四个参数 state 规则同上
+                        ps.setInt(6, order.getStatus());//第四个参数 state 规则同上
+                        ps.setDate(7, new Date(order.getCreateTime().getTime()));//第四个参数 state 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+    }
+
+    public Observable<Integer> updateOrderStatus(Order order) {
+        return Observable.just(order)
+                .map(new Function<Order, Integer>() {
+
+                    @Override
+                    public Integer apply(Order order) throws Exception {
+                        int result=-1;
+                        conn = DBOpenHelper.getConn();
+                        String sql = "update good_order set status=? where id= ?";
+                        ps = conn.prepareStatement(sql);
+                        ps.setInt(1, order.getStatus());//第一个参数 name 规则同上
+                        ps.setInt(2, order.getId());//第二个参数 phone 规则同上
+                        result = ps.executeUpdate();//返回1 执行成功
+                        DBOpenHelper.closeAll(conn, ps);
+                        return result;
+                    }
+                }).onErrorReturn(new Function<Throwable, Integer>() {
+                    @Override
+                    public Integer apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return -1;
+                    }
+                });
+    }
+    public Observable<List<Order>> getOrderList(int id) {
+        return Observable.just(id)
+                .map(new Function<Integer, List<Order>>() {
+                    @Override
+                    public List<Order> apply(Integer id) throws Exception {
+                        List<Order>list=new ArrayList<>();
+                        conn = DBOpenHelper.getConn();
+                        String sql = "SELECT * FROM good_order where sellerId =?";
+                        Log.e("sql",sql);
+                        ps = conn.prepareStatement(sql);
+                        if (ps!=null){
+                            ps.setInt(1,id);
+                            rs = ps.executeQuery();
+                            while (rs.next()){
+                                Order order=new Order();
+                                yonghu u = new yonghu();
+                               order.setAddress(rs.getString("address"));
+                               order.setBuyerName(rs.getString("buyerName"));
+                               order.setCreateTime(rs.getDate("createTime"));
+                               order.setGoodName(rs.getString("goodName"));
+                               order.setId(rs.getInt("id"));
+                               order.setSellerId(rs.getInt("sellerId"));
+                               order.setStatus(rs.getInt("status"));
+                               order.setTel(rs.getString("tel"));
+                                list.add(order);
+                            }
+                        }
+                        DBOpenHelper.closeAll(conn, ps);
+                        return list;
+                    }
+                }).onErrorReturn(new Function<Throwable,  List<Order>>() {
+                    @Override
+                    public  List<Order> apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        DBOpenHelper.closeAll(conn, ps);
+                        return new ArrayList<>();
+                    }
+                });
+
+    }
+
+
+
 
 
 }

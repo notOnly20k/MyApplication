@@ -2,6 +2,7 @@ package com.example.administrator.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.example.administrator.model.shangpin;
 import com.example.administrator.myapplication.R;
 import com.example.administrator.util.AsyncBitmapLoader;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -67,21 +69,26 @@ public class MyGoodslistAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Bitmap bitmap=asyncBitmapLoader.loadBitmap(holder.image, list.get(position).getTupian(), new AsyncBitmapLoader.ImageCallBack() {
+        File file=new File(list.get(position).getTupian());
+        if (file.exists()){
+            holder.image.setImageURI(Uri.fromFile(file));
+        }else {
+            Bitmap bitmap=asyncBitmapLoader.loadBitmap(holder.image, list.get(position).getTupian(), new AsyncBitmapLoader.ImageCallBack() {
 
-            @Override
-            public void imageLoad(ImageView imageView, Bitmap bitmap) {
-                // TODO Auto-generated method stub
-                imageView.setImageBitmap(bitmap);
+                @Override
+                public void imageLoad(ImageView imageView, Bitmap bitmap) {
+                    // TODO Auto-generated method stub
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+            if(bitmap == null)
+            {
+                holder.image.setImageResource(R.drawable.touxiang);
             }
-        });
-        if(bitmap == null)
-        {
-            holder.image.setImageResource(R.drawable.touxiang);
-        }
-        else
-        {
-            holder.image.setImageBitmap(bitmap);
+            else
+            {
+                holder.image.setImageBitmap(bitmap);
+            }
         }
         holder.image.setTag(list.get(position).getTupian());
         holder.gname.setText(list.get(position).getMincheng());

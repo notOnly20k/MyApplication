@@ -263,7 +263,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="10dp"
-                                        android:text="和我聊天"
+                                        android:text="收藏"
                                         android:textSize="15dp" />
                                 </LinearLayout>
 
@@ -383,7 +383,7 @@
                     android:layout_marginTop="7dp"
                     android:layout_weight="1"
                     android:background="@drawable/mian_bg"
-                    android:text="私聊"
+                    android:text="下单"
                     android:textColor="@color/coral" />
 
             </LinearLayout>

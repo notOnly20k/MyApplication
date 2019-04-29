@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.adapter.CommentExpandAdapter;
+import com.example.administrator.model.Order;
 import com.example.administrator.model.pinlun;
 import com.example.administrator.model.pinlun_Table;
 import com.example.administrator.model.pinlunhuifu;
@@ -56,6 +58,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
     shangpin shangpin;
     private String tel;
     private int chushipinglunshu = 0;
+    private boolean collection=true;
 
     private List<pinlun> pinlunsList;
     private ExpandableListView expandableListView;
@@ -86,10 +89,10 @@ public class shangpin_xiangqing extends AppCompatActivity {
     // 返回按钮键触发的事件
     public void fanhui(android.view.View v) {
         this.finish();
-        Intent it = new Intent(shangpin_xiangqing.this, shangpinliebiao.class);
-        it.putExtra("dengluuser", yonghu);
-        it.putExtra("type", shangpin.getLeibie());
-        startActivity(it);
+//        Intent it = new Intent(shangpin_xiangqing.this, shangpinliebiao.class);
+//        it.putExtra("dengluuser", yonghu);
+//        it.putExtra("type", shangpin.getLeibie());
+//        startActivity(it);
 
     }
 
@@ -124,8 +127,36 @@ public class shangpin_xiangqing extends AppCompatActivity {
         pd.setIndeterminate(true);
         pd.setCancelable(false);
         pinlunsList=new ArrayList<>();
+        getCollection();
         selectComment(shangpin.getShangpinid());
 
+    }
+
+    private void getCollection() {
+        pd.show();
+        DBService.getDbService().getCollectGoodsData(yonghu.getYonghuid())
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        compositeDisposable.add(disposable);
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<shangpin>>() {
+                    @Override
+                    public void accept(List<shangpin> shangpins) throws Exception {
+                        for (int i = 0; i < shangpins.size(); i++) {
+                            shangpin good=shangpins.get(i);
+                            if (good.getShangpinid()==shangpin.getShangpinid()){
+                                address.setText("已收藏");
+                            }
+                        }
+
+                        pd.cancel();
+
+                    }
+                });
     }
 
     private void loaddata() {
@@ -222,7 +253,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
 
     public void setBuy() {
         SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
-        if (yonghu.getYonghuid() == shangpin.getYonghuid())
+        if (false)
             Toast.makeText(shangpin_xiangqing.this, "不能买自己的宝贝", Toast.LENGTH_SHORT).show();
         else {
             AlertDialog.Builder normalDialog =
@@ -232,33 +263,40 @@ public class shangpin_xiangqing extends AppCompatActivity {
             normalDialog.setPositiveButton("确定",
                     new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            pd.show();
-
-                            new Thread() {
-                                @Override
-                                public void run() {
-                                    /*Map<String, String> params = new HashMap<String, String>();
-                                    params.put("uid",Integer.toString(uid));
-                                    params.put("guid",Integer.toString(guid));
-                                    params.put("gid",Integer.toString(gid));
-                                    String strUrlpath = getResources().getString(R.string.burl) + "TradeAction_Insert.action";
-                                    String Result = HttpUtils.submitPostData(strUrlpath, params, "utf-8");
-                                    System.out.println("结果为：" + Result);
-                                    Message message = new Message();
-                                    message.what = 3;
-                                    message.obj = Result;
-                                    handler.sendMessage(message);*/
-                                }
-                            }.start();
+                        public void onClick(final DialogInterface dialog, int which) {
+                            Order order=new Order();
+                            order.setStatus(2);
+                            order.setTel(yonghu.getLianxidianhua());
+                            order.setGoodName(shangpin.getMincheng());
+                            order.setCreateTime(new Date());
+                            order.setSellerId(shangpin.getYonghuid());
+                            order.setBuyerName(yonghu.getXingming());
+                            order.setAddress(yonghu.getDizhi());
+                            DBService.getDbService().insertOrder(order)
+                                    .subscribeOn(Schedulers.io())
+                                    .doOnSubscribe(new Consumer<Disposable>() {
+                                        @Override
+                                        public void accept(Disposable disposable) throws Exception {
+                                            compositeDisposable.add(disposable);
+                                        }
+                                    })
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Consumer<Integer>() {
+                                        @Override
+                                        public void accept(Integer resulet) {
+                                            if (resulet==1){
+                                                Toast.makeText(shangpin_xiangqing.this,"成功拍下等待卖家确认联系",Toast.LENGTH_LONG).show();
+                                                dialog.dismiss();
+                                            }
+                                        }
+                                    });
                         }
                     });
             normalDialog.setNegativeButton("取消",
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            //...To-do
+                            dialog.dismiss();
                         }
                     });
             // 显示
@@ -308,6 +346,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
         pinlun.setYonghuid(yonghu.getYonghuid());
         pinlun.setYonghu(yonghu);
         pinlun.setZhuangtai(0);
+        pd.show();
         DBService.getDbService().insertComment(pinlun)
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe(new Consumer<Disposable>() {
@@ -387,7 +426,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
 //                }else {
 //                    expandableListView.expandGroup(groupPosition, true);
 //                }
-                showReplyDialog(groupPosition);
+//                showReplyDialog(groupPosition);
                 return true;
             }
         });
@@ -475,14 +514,69 @@ public class shangpin_xiangqing extends AppCompatActivity {
 
     //聊天
     public void chat(View view) {
-        if (shangpin.getYonghuid() == yonghu.getYonghuid()) {
-            layout_chat.setVisibility(View.INVISIBLE);
-        } else {
-            Intent intent = new Intent(shangpin_xiangqing.this, chat.class);
-            intent.putExtra("shoujianren", shangpin.getYonghuid());
-            intent.putExtra("dengluuser", yonghu);
-            startActivity(intent);
-        }
+        if (!collection)
+        DBService.getDbService().collectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(),shangpin.getShangpinid()))
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        compositeDisposable.add(disposable);
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) {
+                        if (integer == 1) {
+                          address.setText("已收藏");
+                            collection=true;
+                        } else {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(shangpin_xiangqing.this);
+                            builder.setTitle("确认");
+                            builder.setMessage("收藏失败");
+                            builder.setPositiveButton("是", null);
+                            builder.show();
+                        }
+                        pd.cancel();
+                    }
+                });
+
+        else
+            DBService.getDbService().delcollectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(),shangpin.getShangpinid()))
+                    .subscribeOn(Schedulers.io())
+                    .doOnSubscribe(new Consumer<Disposable>() {
+                        @Override
+                        public void accept(Disposable disposable) throws Exception {
+                            compositeDisposable.add(disposable);
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Integer>() {
+                        @Override
+                        public void accept(Integer integer) {
+                            if (integer == 1) {
+                                address.setText("收藏");
+                                collection=false;
+                            } else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(shangpin_xiangqing.this);
+                                builder.setTitle("确认");
+                                builder.setMessage("收藏失败");
+                                builder.setPositiveButton("是", null);
+                                builder.show();
+                            }
+                            pd.cancel();
+                        }
+                    });
+
+
+//        if (shangpin.getYonghuid() == yonghu.getYonghuid()) {
+//            layout_chat.setVisibility(View.INVISIBLE);
+//        } else {
+//            Intent intent = new Intent(shangpin_xiangqing.this, chat.class);
+//            intent.putExtra("shoujianren", shangpin.getYonghuid());
+//            intent.putExtra("dengluuser", yonghu);
+//            startActivity(intent);
+//        }
 
     }
 }

@@ -36,6 +36,7 @@
         <activity android:name=".fabu_shangpin" />
         <activity android:name=".fenlei" />
         <activity android:name=".shangpin_xiangqing" />
+        <activity android:name=".fabu_gunali" />
     </application>
 
 </manifest>

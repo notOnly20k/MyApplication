@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -56,9 +57,15 @@ public class goodlist extends AppCompatActivity implements View.OnClickListener 
         mBack = (LinearLayout) findViewById(R.id.back);
         yonghu = (yonghu) intent.getSerializableExtra("dengluuser");
         type = intent.getStringExtra("type");
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         switch (type){
             case COLLECTION:
-                getMyData();
+                getCollectionData();
                 break;
             case SETTING:
                 getMyData();
@@ -67,6 +74,25 @@ public class goodlist extends AppCompatActivity implements View.OnClickListener 
                 getMyData();
                 break;
         }
+    }
+
+    private void getCollectionData() {
+        DBService.getDbService().getCollectGoodsData(yonghu.getYonghuid())
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        compositeDisposable.add(disposable);
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<shangpin>>() {
+                    @Override
+                    public void accept(List<shangpin> list) {
+                        show(list);
+                        pd.dismiss();
+                    }
+                });
     }
 
     private void getMyData() {
@@ -90,6 +116,7 @@ public class goodlist extends AppCompatActivity implements View.OnClickListener 
     ArrayList<shangpin> mData= new ArrayList<shangpin>();
 
     public void show(List<shangpin> shangpins){
+        mData.clear();
         pd.cancel();
         if(shangpins.size()>= 1)
         {
@@ -103,10 +130,19 @@ public class goodlist extends AppCompatActivity implements View.OnClickListener 
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position,
                                         long id) {
-                    Intent intent = new Intent(goodlist.this,shangpin_xiangqing.class);
-                    intent.putExtra("chakanshangping",mData.get(position));
-                    intent.putExtra("dengluuser",yonghu);
-                    startActivity(intent);
+                    if (type.equals(SETTING)){
+                        Log.e("ssss",type);
+                        Intent intent = new Intent(goodlist.this,fabu_gunali.class);
+                        intent.putExtra("chakanshangping",mData.get(position));
+                        intent.putExtra("dengluuser",yonghu);
+                        startActivity(intent);
+                    }else {
+                        Intent intent = new Intent(goodlist.this,shangpin_xiangqing.class);
+                        intent.putExtra("chakanshangping",mData.get(position));
+                        intent.putExtra("dengluuser",yonghu);
+                        startActivity(intent);
+                    }
+
                 }
             });
         }
