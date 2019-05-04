@@ -58,7 +58,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
     shangpin shangpin;
     private String tel;
     private int chushipinglunshu = 0;
-    private boolean collection=true;
+    private boolean collection = false;
 
     private List<pinlun> pinlunsList;
     private ExpandableListView expandableListView;
@@ -126,7 +126,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
         pd.setMessage("下单中...");
         pd.setIndeterminate(true);
         pd.setCancelable(false);
-        pinlunsList=new ArrayList<>();
+        pinlunsList = new ArrayList<>();
         getCollection();
         selectComment(shangpin.getShangpinid());
 
@@ -147,8 +147,8 @@ public class shangpin_xiangqing extends AppCompatActivity {
                     @Override
                     public void accept(List<shangpin> shangpins) throws Exception {
                         for (int i = 0; i < shangpins.size(); i++) {
-                            shangpin good=shangpins.get(i);
-                            if (good.getShangpinid()==shangpin.getShangpinid()){
+                            shangpin good = shangpins.get(i);
+                            if (good.getShangpinid() == shangpin.getShangpinid()) {
                                 address.setText("已收藏");
                             }
                         }
@@ -172,7 +172,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
             commentnum.setText("(" + chushipinglunshu + ")");
             initExpandableListView(pinlunsList);
         }
-        nickname.setText(yonghu.getXingming() != null ? yonghu.getXingming() : "");
+        nickname.setText(shangpin.getYonghu().getXingming() != null ? shangpin.getYonghu().getXingming() : "");
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         time.setText(formatter.format(shangpin.getShijian()));
         Log.i("shangpin", shangpin.getShijian().toString());
@@ -218,8 +218,8 @@ public class shangpin_xiangqing extends AppCompatActivity {
                 .subscribe(new Consumer<List<pinlun>>() {
                     @Override
                     public void accept(List<pinlun> pinluns) throws Exception {
-                        Log.e("ssss",pinluns.size()+"");
-                        pinlunsList=pinluns;
+                        Log.e("ssss", pinluns.size() + "");
+                        pinlunsList = pinluns;
                         adapter = new CommentExpandAdapter(shangpin_xiangqing.this, pinlunsList);
                         loaddata();
                     }
@@ -264,7 +264,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, int which) {
-                            Order order=new Order();
+                            Order order = new Order();
                             order.setStatus(2);
                             order.setTel(yonghu.getLianxidianhua());
                             order.setGoodName(shangpin.getMincheng());
@@ -284,8 +284,8 @@ public class shangpin_xiangqing extends AppCompatActivity {
                                     .subscribe(new Consumer<Integer>() {
                                         @Override
                                         public void accept(Integer resulet) {
-                                            if (resulet==1){
-                                                Toast.makeText(shangpin_xiangqing.this,"成功拍下等待卖家确认联系",Toast.LENGTH_LONG).show();
+                                            if (resulet == 1) {
+                                                Toast.makeText(shangpin_xiangqing.this, "成功拍下等待卖家确认联系", Toast.LENGTH_LONG).show();
                                                 dialog.dismiss();
                                             }
                                         }
@@ -337,7 +337,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
         }
     }
 
-    public void saveComment(){
+    public void saveComment() {
         final pinlun pinlun = new pinlun();
         pinlun.setMaijiaid(shangpin.getYonghuid());
         pinlun.setNeirong(commentedt.getText().toString().trim());
@@ -515,34 +515,7 @@ public class shangpin_xiangqing extends AppCompatActivity {
     //聊天
     public void chat(View view) {
         if (!collection)
-        DBService.getDbService().collectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(),shangpin.getShangpinid()))
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        compositeDisposable.add(disposable);
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer integer) {
-                        if (integer == 1) {
-                          address.setText("已收藏");
-                            collection=true;
-                        } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(shangpin_xiangqing.this);
-                            builder.setTitle("确认");
-                            builder.setMessage("收藏失败");
-                            builder.setPositiveButton("是", null);
-                            builder.show();
-                        }
-                        pd.cancel();
-                    }
-                });
-
-        else
-            DBService.getDbService().delcollectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(),shangpin.getShangpinid()))
+            DBService.getDbService().collectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(), shangpin.getShangpinid()))
                     .subscribeOn(Schedulers.io())
                     .doOnSubscribe(new Consumer<Disposable>() {
                         @Override
@@ -555,8 +528,8 @@ public class shangpin_xiangqing extends AppCompatActivity {
                         @Override
                         public void accept(Integer integer) {
                             if (integer == 1) {
-                                address.setText("收藏");
-                                collection=false;
+                                address.setText("已收藏");
+                                collection = true;
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(shangpin_xiangqing.this);
                                 builder.setTitle("确认");
@@ -564,6 +537,25 @@ public class shangpin_xiangqing extends AppCompatActivity {
                                 builder.setPositiveButton("是", null);
                                 builder.show();
                             }
+                            pd.cancel();
+                        }
+                    });
+
+        else
+            DBService.getDbService().delcollectionGood(new Pair<Integer, Integer>(yonghu.getYonghuid(), shangpin.getShangpinid()))
+                    .subscribeOn(Schedulers.io())
+                    .doOnSubscribe(new Consumer<Disposable>() {
+                        @Override
+                        public void accept(Disposable disposable) throws Exception {
+                            compositeDisposable.add(disposable);
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Integer>() {
+                        @Override
+                        public void accept(Integer integer) {
+                            address.setText("收藏");
+                            collection = false;
                             pd.cancel();
                         }
                     });
